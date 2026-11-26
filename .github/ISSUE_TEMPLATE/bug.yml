@@ -1,0 +1,95 @@
+name: 🐞 Баг / Bug report
+description: Что-то не работает или работает не так / Something is broken
+title: "[Баг] "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Спасибо, что сообщаешь об ошибке! Чем подробнее опишешь, тем быстрее починим.
+        Thanks for reporting! The more details, the faster the fix.
+
+  - type: textarea
+    id: what
+    attributes:
+      label: Что случилось? / What happened?
+      description: Опиши проблему своими словами.
+      placeholder: Например, «при установке Sodium в сборку Fabric 1.21.1 появляется ошибка …»
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Как повторить / Steps to reproduce
+      placeholder: |
+        1. Открыть …
+        2. Нажать …
+        3. Увидеть ошибку
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Что ожидалось / Expected behavior
+    validations:
+      required: false
+
+  - type: input
+    id: version
+    attributes:
+      label: Версия Axolaunch / Launcher version
+      description: Настройки → О программе
+      placeholder: "1.1.9"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Где проблема / Area
+      options:
+        - Установка Minecraft / загрузчика
+        - Запуск игры / вылет
+        - Каталог Modrinth
+        - Каталог CurseForge
+        - Моды и контент сборки
+        - Импорт / экспорт .mrpack
+        - Доктор сборки
+        - Аккаунты / вход
+        - Интерфейс / темы
+        - Другое
+    validations:
+      required: true
+
+  - type: input
+    id: instance
+    attributes:
+      label: Сборка / Instance
+      description: Версия Minecraft и загрузчик, если проблема связана со сборкой
+      placeholder: "Fabric 1.21.1"
+    validations:
+      required: false
+
+  - type: dropdown
+    id: os
+    attributes:
+      label: Система / OS
+      options:
+        - Windows 11
+        - Windows 10
+        - Другая / Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Лог или скриншот / Logs or screenshots
+      description: |
+        Лог игры: вкладка «Логи» у сборки → «Копировать». Скриншот можно просто вставить сюда.
+        ⚠️ Перед отправкой убери из лога личные данные, если они там есть.
+      render: shell
+    validations:
+      required: false

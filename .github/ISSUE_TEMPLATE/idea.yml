@@ -1,0 +1,50 @@
+name: 💡 Идея / Feature request
+description: Предложи новую функцию или улучшение / Suggest a feature
+title: "[Идея] "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Классно, что у тебя есть идея! Опиши её — самые популярные попадут в следующие версии.
+        Great that you have an idea! Popular ones make it into the next releases.
+
+  - type: textarea
+    id: idea
+    attributes:
+      label: Идея / The idea
+      description: Что ты хочешь, чтобы лаунчер умел?
+      placeholder: Например, «добавить вкладку с серверами в сборке»
+    validations:
+      required: true
+
+  - type: textarea
+    id: why
+    attributes:
+      label: Зачем это нужно / Why
+      description: Какую проблему это решит или что станет удобнее?
+    validations:
+      required: false
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Раздел / Area
+      options:
+        - Каталог и установка модов
+        - Сборки и запуск игры
+        - Доктор сборки
+        - Темы и внешний вид
+        - Аксолотль и приколюхи
+        - Сайт
+        - Другое
+    validations:
+      required: false
+
+  - type: textarea
+    id: extra
+    attributes:
+      label: Дополнительно / Additional context
+      description: Скриншоты, примеры из других лаунчеров, наброски.
+    validations:
+      required: false
