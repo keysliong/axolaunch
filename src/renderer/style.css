@@ -473,3 +473,11 @@ h2.h-ic svg { color: var(--accent); width: 20px; height: 20px; }
 .src-card .dim { font-size: 13px; }
 .src-seg button { display: inline-flex; align-items: center; gap: 7px; }
 .cf-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #f16436; margin-right: 6px; vertical-align: middle; }
+
+/* Каталог: моды, которых нет под выбранную версию/загрузчик */
+#d-other:not(:empty) { margin-top: 22px; }
+.other-head { display: flex; gap: 10px; align-items: flex-start; padding: 12px 14px; margin-bottom: 10px; border-radius: var(--radius); border: 1px dashed var(--border); font-size: 13px; }
+.other-head svg { flex: none; margin-top: 2px; color: var(--text-muted); }
+.proj.unavail { opacity: .62; }
+.proj.unavail:hover { opacity: 1; }
+.proj .avail { font-size: 12px; text-align: right; line-height: 1.5; max-width: 170px; }

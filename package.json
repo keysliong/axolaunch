@@ -1,7 +1,7 @@
 {
   "name": "axolaunch",
   "productName": "Axolaunch",
-  "version": "1.1.9",
+  "version": "1.2.0",
   "description": "Axolaunch — Minecraft launcher with Modrinth integration",
   "main": "src/main/main.js",
   "scripts": {

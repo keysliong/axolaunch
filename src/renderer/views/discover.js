@@ -76,6 +76,7 @@ registerView('discover', async (el, params) => {
         <div id="d-info" class="dim" style="margin-bottom:10px;font-size:13px"></div>
         <div id="d-results"><div class="spinner"></div></div>
         <div class="pager" id="d-pager"></div>
+        <div id="d-other"></div>
       </div>
     </div>`
 
@@ -95,6 +96,7 @@ registerView('discover', async (el, params) => {
       box.innerHTML = r.hits.length ? r.hits.map(projRow).join('') : `<div class="empty"><div class="big">${icon('search')}</div>${t('Ничего не нашлось. Попробуйте другие фильтры.')}${filtered ? `<div style="margin-top:12px"><button class="btn sm" data-nofilter>${icon('x')}${t('Искать без фильтров')}</button></div>` : ''}</div>`
       if (target) box.querySelectorAll('[data-install]').forEach(b => b.innerHTML = `${icon('download')}${t('В «{name}»', { name: esc(target.name.slice(0, 18)) })}`)
       if (target) markInstalled()
+      showOthers(my, r)
       const pages = Math.ceil(r.total_hits / 20)
       const pg = el.querySelector('#d-pager')
       const cur = f.page
@@ -106,6 +108,30 @@ registerView('discover', async (el, params) => {
       if (cf && (e.message || '').match(/API|ключ|key/i)) box.innerHTML = `<div class="empty"><div class="big">${icon('lock')}</div>${esc(e.message)}<div style="margin-top:12px"><button class="btn sm primary" data-cfkey>${t('Указать ключ')}</button></div></div>`
       else box.innerHTML = `<div class="empty"><div class="big">${icon('wifiOff')}</div>${cf ? t('Нет связи с CurseForge') : t('Нет связи с Modrinth')}<br><span class="dim">${esc(e.message)}</span></div>`
     }
+  }
+  // Моды, которые нашлись бы без фильтра версии/загрузчика: у многих (например, ATMOSPHERICS)
+  // нет нужной пары «загрузчик + версия», и Modrinth их просто не возвращает. Показываем их отдельно.
+  async function showOthers(my, r) {
+    const other = el.querySelector('#d-other')
+    other.innerHTML = ''
+    if (!f.query.trim() || !(f.versions.length || f.loaders.length) || r.hits.length >= 20) return
+    let all
+    try { all = await call(cf ? 'cf:search' : 'modrinth:search', { query: f.query, type, categories: f.categories, loaders: [], versions: [], env: f.env, index: f.index, offset: 0, limit: 20 }) } catch { return }
+    if (my !== seq || !other.isConnected) return
+    const seen = new Set(r.hits.map(h => h.project_id || h.id))
+    const rest = all.hits.filter(h => !seen.has(h.project_id || h.id)).slice(0, 8)
+    if (!rest.length) return
+    const want = [f.loaders.map(l => LOADERS[l] || l).join('/'), f.versions.join(', ')].filter(Boolean).join(' ')
+    other.innerHTML = `<div class="other-head">${icon('info')}<div><b>${t('Есть, но не для {want}', { want: esc(want) })}</b><div class="dim">${t('У этих модов нет версии под выбранный загрузчик и версию игры. Откройте мод, чтобы посмотреть, для чего он выходит.')}</div></div></div>` +
+      rest.map(projRow).join('')
+    other.querySelectorAll('.proj').forEach((row, i) => {
+      const h = rest[i]
+      const loaders = (h.loaders || h.categories || []).filter(c => LOADERS[c] && c !== 'vanilla').map(c => LOADERS[c])
+      const vers = (h.game_versions || h.versions || []).filter(v => /^\d+\.\d+(\.\d+)?$/.test(v)).slice(-4).reverse()
+      const btn = row.querySelector('[data-install]')
+      btn.outerHTML = `<div class="avail dim">${t('Есть для')}:<br><b>${esc([...new Set(loaders)].join(', ') || '—')}</b><br>${esc(vers.join(', '))}</div>`
+      row.classList.add('unavail')
+    })
   }
   // отмечаем моды, которые уже есть в выбранной сборке (в т.ч. поставленные как зависимости)
   async function markInstalled() {
@@ -173,7 +199,21 @@ registerView('discover', async (el, params) => {
   on(el, '[data-back-inst]', 'click', () => navigate('instance', { id: target.id }))
   on(el, '[data-lucky]', 'click', async () => {
     unlock('lucky')
-    try { const p = await call('modrinth:random'); navigate('project', { id: p.id, target: params.target }) } catch (e) { errToast(e) }
+    // /projects_random у Modrinth кэшируется (всегда один и тот же проект) и не знает про фильтры,
+    // поэтому берём случайный проект из поиска с текущими фильтрами среди 2000 самых популярных
+    try {
+      // без поиска и фильтров — случайный тип, моды чаще всего; иначе уважаем текущую вкладку
+      const free = !f.query && !f.categories.length && !f.loaders.length && !f.versions.length && !f.env.length
+      const pool = ['mod', 'mod', 'mod', 'mod', 'modpack', 'shader', 'resourcepack', 'datapack']
+      const ty = free ? pool[Math.floor(Math.random() * pool.length)] : type
+      const q = { query: f.query, type: ty, categories: f.categories, loaders: f.loaders, versions: f.versions, env: f.env, index: 'downloads', limit: 1 }
+      const first = await call('modrinth:search', { ...q, offset: 0 })
+      const total = Math.min(first.total_hits, 2000)
+      if (!total) return errToast(new Error(t('Ничего не нашлось. Попробуйте другие фильтры.')))
+      const r = await call('modrinth:search', { ...q, offset: Math.floor(Math.random() * total) })
+      const p = r.hits[0] || first.hits[0]
+      navigate('project', { id: p.project_id, target: params.target })
+    } catch (e) { errToast(e) }
   })
   search()
 })

@@ -7,7 +7,7 @@ const { pipeline } = require('stream/promises')
 const { currentSignal, throwIfCancelled, isCancel } = require('./tasks')
 const { t } = require('./i18n')
 
-const UA = 'Axolaunch/1.1.9 (minecraft launcher)'
+const UA = 'Axolaunch/1.2.0 (minecraft launcher)'
 const STALL_MS = 30000 // РµСЃР»Рё 30 СЃ РЅРµ РїСЂРёС€Р»Рѕ РЅРё Р±Р°Р№С‚Р° вЂ” СЃРѕРµРґРёРЅРµРЅРёРµ СЃС‡РёС‚Р°РµРј Р·Р°РІРёСЃС€РёРј
 
 /** fetch, РєРѕС‚РѕСЂС‹Р№ РѕС‚РјРµРЅСЏРµС‚СЃСЏ Р·Р°РґР°С‡РµР№ Рё РѕР±СЂС‹РІР°РµС‚СЃСЏ РїСЂРё Р·Р°РІРёСЃР°РЅРёРё (Р±РµР· РґР°РЅРЅС‹С… STALL_MS) */
