@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data: https: axo:; media-src https: axo:; style-src 'self' 'unsafe-inline'; script-src 'self'; frame-src https://www.youtube.com https://www.youtube-nocookie.com; connect-src 'none'" />
+  <title>Axolaunch</title>
+  <link rel="stylesheet" href="style.css" />
+  <style id="custom-css"></style>
+</head>
+<body>
+  <div id="bg"></div>
+  <div id="app">
+    <aside id="rail"></aside>
+    <main id="main">
+      <header id="topbar"></header>
+      <section id="view"></section>
+    </main>
+  </div>
+  <div id="toasts"></div>
+  <div id="modal-root"></div>
+  <div id="ctx-root"></div>
+  <script src="vendor/marked.min.js"></script>
+  <script src="vendor/purify.min.js"></script>
+  <script type="module" src="app.js"></script>
+</body>
+</html>

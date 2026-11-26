@@ -1,0 +1,8 @@
+node_modules/
+dist/
+.claude/
+custom-css/
+*.log
+*.part
+.DS_Store
+Thumbs.db

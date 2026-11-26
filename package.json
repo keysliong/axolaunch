@@ -1,0 +1,58 @@
+{
+  "name": "axolaunch",
+  "productName": "Axolaunch",
+  "version": "1.1.9",
+  "description": "Axolaunch — Minecraft launcher with Modrinth integration",
+  "main": "src/main/main.js",
+  "scripts": {
+    "start": "electron .",
+    "dist": "npx electron-builder --win",
+    "icon": "electron build/icon-from-svg.js"
+  },
+  "author": "Axolaunch contributors",
+  "homepage": "https://keysliong.github.io/axolaunch/",
+  "repository": { "type": "git", "url": "https://github.com/keysliong/axolaunch.git" },
+  "license": "MIT",
+  "devDependencies": {
+    "dompurify": "^3.5.0",
+    "electron": "^45.4.1",
+    "electron-builder": "^26.18.0",
+    "marked": "^12.0.2"
+  },
+  "dependencies": {
+    "@xmcl/core": "2.13.0",
+    "@xmcl/installer": "5.4.0",
+    "adm-zip": "^0.6.1",
+    "undici": "6.0.1"
+  },
+  "build": {
+    "appId": "app.axolaunch",
+    "productName": "Axolaunch",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "src/**",
+      "assets/**",
+      "package.json"
+    ],
+    "win": {
+      "icon": "assets/icon.ico",
+      "target": [
+        "nsis",
+        "portable"
+      ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true
+    },
+    "fileAssociations": [
+      {
+        "ext": "mrpack",
+        "name": "Modrinth Modpack",
+        "icon": "assets/icon.ico"
+      }
+    ]
+  }
+}

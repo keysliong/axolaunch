@@ -1,0 +1,360 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Axolaunch — лаунчер Minecraft</title>
+<meta name="description" content="Axolaunch — бесплатный лаунчер Minecraft: моды с Modrinth и CurseForge, Fabric, Forge, NeoForge и Quilt, «Доктор сборки», который чинит вылеты, 10 тем и аксолотль-питомец.">
+<meta property="og:title" content="Axolaunch — лаунчер Minecraft">
+<meta property="og:description" content="Моды с Modrinth и CurseForge в пару кликов, починка вылетов, темы и аксолотль.">
+<meta property="og:image" content="img/home.png">
+<meta property="og:type" content="website">
+<meta name="theme-color" content="#0b0912">
+<link rel="icon" href="icon.png">
+<style>
+@font-face { font-family: Manrope; src: url(fonts/manrope-latin-wght-normal.woff2) format('woff2'); font-weight: 200 800; unicode-range: U+0000-00FF, U+2000-206F, U+20AC; }
+@font-face { font-family: Manrope; src: url(fonts/manrope-cyrillic-wght-normal.woff2) format('woff2'); font-weight: 200 800; unicode-range: U+0400-04FF; }
+@font-face { font-family: JBM; src: url(fonts/jetbrains-mono-latin-wght-normal.woff2) format('woff2'); font-weight: 100 800; }
+
+:root {
+  --bg: #0b0912; --bg2: #120f1c; --card: #17131f; --line: #ffffff14; --text: #efeaf7; --muted: #a59cb8;
+  --pink: #ff5dbd; --violet: #dc51ff; --indigo: #8d6bff; --green: #2fe08a;
+  --grad: linear-gradient(120deg, var(--pink), var(--violet) 50%, var(--indigo));
+  --r: 18px;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.6 Manrope, 'Segoe UI', system-ui, sans-serif; -webkit-font-smoothing: antialiased; overflow-x: hidden; }
+a { color: inherit; }
+img { max-width: 100%; height: auto; display: block; }
+.wrap { width: min(1160px, 100% - 32px); margin: 0 auto; }
+
+/* фон */
+.glow { position: fixed; inset: 0; pointer-events: none; z-index: -1;
+  background: radial-gradient(800px 500px at 85% -10%, #dc51ff26, transparent 70%), radial-gradient(700px 500px at -10% 30%, #ff5dbd1c, transparent 70%), radial-gradient(900px 600px at 50% 120%, #8d6bff1f, transparent 70%); }
+
+/* шапка */
+header { position: sticky; top: 0; z-index: 10; backdrop-filter: blur(16px); background: #0b0912b3; border-bottom: 1px solid var(--line); }
+header .wrap { display: flex; align-items: center; gap: 18px; height: 64px; }
+.brand { display: flex; align-items: center; gap: 10px; font-weight: 800; font-size: 18px; text-decoration: none; }
+.brand img { width: 34px; height: 34px; border-radius: 10px; box-shadow: 0 0 18px #dc51ff55; }
+nav { display: flex; gap: 22px; margin-left: auto; }
+nav a { color: var(--muted); text-decoration: none; font-weight: 600; font-size: 14.5px; }
+nav a:hover { color: var(--text); }
+.lang { border: 1px solid var(--line); background: none; color: var(--text); font: 700 13px Manrope, sans-serif; border-radius: 99px; padding: 6px 12px; cursor: pointer; }
+
+/* кнопки */
+.btn { display: inline-flex; align-items: center; gap: 10px; height: 52px; padding: 0 24px; border-radius: 14px; font-weight: 800; font-size: 16px; text-decoration: none; border: 0; cursor: pointer; transition: transform .15s, box-shadow .2s, filter .2s; }
+.btn svg { width: 20px; height: 20px; }
+.btn.main { background: var(--grad); color: #fff; box-shadow: 0 10px 30px #dc51ff44; }
+.btn.main:hover { transform: translateY(-2px); box-shadow: 0 14px 40px #dc51ff66; }
+.btn.ghost { background: #ffffff0d; border: 1px solid var(--line); color: var(--text); }
+.btn.ghost:hover { background: #ffffff17; }
+
+/* hero */
+.hero { padding: 80px 0 40px; text-align: center; }
+.hero .logo { width: 112px; height: 112px; margin: 0 auto 26px; border-radius: 30px; box-shadow: 0 0 60px #dc51ff55, 0 0 0 1px #ffffff1a; animation: float 6s ease-in-out infinite; }
+@keyframes float { 50% { transform: translateY(-8px) rotate(-2deg); } }
+.badge { display: inline-flex; align-items: center; gap: 8px; padding: 6px 14px; border-radius: 99px; background: #ffffff0b; border: 1px solid var(--line); color: var(--muted); font-size: 13.5px; font-weight: 600; margin-bottom: 20px; }
+.badge b { color: var(--green); }
+h1 { font-size: clamp(38px, 6.4vw, 72px); line-height: 1.05; letter-spacing: -.03em; margin: 0 0 18px; font-weight: 800; }
+h1 .g { background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.lead { font-size: clamp(17px, 2vw, 20px); color: var(--muted); max-width: 680px; margin: 0 auto 32px; }
+.cta { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+.sub-cta { margin-top: 14px; color: var(--muted); font-size: 13.5px; }
+.sub-cta a { color: var(--text); }
+.shot-main { margin: 60px auto 0; max-width: 1080px; border-radius: 22px; overflow: hidden; border: 1px solid #ffffff1f; box-shadow: 0 40px 120px #000a, 0 0 80px #dc51ff22; transform: perspective(1600px) rotateX(6deg); transition: transform .6s; }
+.shot-main:hover { transform: none; }
+
+/* секции */
+section { padding: 90px 0; }
+.kicker { font-family: JBM, monospace; color: var(--pink); font-size: 13px; letter-spacing: .12em; text-transform: uppercase; font-weight: 700; }
+h2 { font-size: clamp(30px, 4vw, 44px); line-height: 1.1; letter-spacing: -.02em; margin: 10px 0 14px; }
+.sec-lead { color: var(--muted); max-width: 640px; margin: 0 0 40px; font-size: 17px; }
+
+.features { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; }
+.f { background: linear-gradient(180deg, #ffffff08, #ffffff03); border: 1px solid var(--line); border-radius: var(--r); padding: 24px; transition: border-color .2s, transform .2s; }
+.f:hover { border-color: #dc51ff55; transform: translateY(-3px); }
+.f .ic { width: 46px; height: 46px; border-radius: 13px; display: grid; place-items: center; background: var(--grad); margin-bottom: 16px; box-shadow: 0 6px 20px #dc51ff33; }
+.f .ic svg { width: 24px; height: 24px; color: #fff; }
+.f h3 { margin: 0 0 6px; font-size: 18px; }
+.f p { margin: 0; color: var(--muted); font-size: 15px; }
+
+/* доктор */
+.split { display: grid; grid-template-columns: 1fr 1.15fr; gap: 50px; align-items: center; }
+.doc-card { background: var(--card); border: 1px solid var(--line); border-radius: 20px; padding: 22px; box-shadow: 0 30px 80px #0008; }
+.doc-card h4 { margin: 0 0 14px; font-size: 17px; }
+.doc-item { border: 1px solid var(--line); border-left: 3px solid #ff5c6c; border-radius: 12px; padding: 12px 14px; margin-bottom: 10px; background: #0d0b13; }
+.doc-item b { display: block; }
+.doc-item span { color: var(--muted); font-size: 13.5px; }
+.pills { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 10px; }
+.pill { padding: 5px 11px; border-radius: 99px; background: #ffffff0f; font-size: 13px; }
+.pill.on { background: #ff5dbd26; outline: 1px solid var(--pink); }
+.doc-btn { margin-top: 6px; display: flex; justify-content: flex-end; }
+.doc-btn span { background: var(--grad); padding: 9px 18px; border-radius: 10px; font-weight: 800; font-size: 14px; }
+ul.check { list-style: none; padding: 0; margin: 20px 0 0; }
+ul.check li { padding-left: 30px; position: relative; margin: 10px 0; color: var(--muted); }
+ul.check li::before { content: ''; position: absolute; left: 0; top: 5px; width: 18px; height: 18px; border-radius: 6px; background: var(--grad); -webkit-mask: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5" fill="none" stroke="black" stroke-width="3"/></svg>') center/14px no-repeat, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask-composite: exclude; }
+ul.check li b { color: var(--text); }
+
+/* темы */
+.themes { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+.themes figure { margin: 0; border-radius: 16px; overflow: hidden; border: 1px solid var(--line); background: var(--card); }
+.themes figcaption { padding: 12px 16px; font-weight: 700; display: flex; align-items: center; gap: 10px; }
+.themes figcaption i { width: 12px; height: 12px; border-radius: 50%; }
+.swatches { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 26px; }
+.sw { display: flex; align-items: center; gap: 8px; padding: 7px 13px 7px 8px; border-radius: 99px; background: #ffffff0a; border: 1px solid var(--line); font-size: 14px; font-weight: 600; }
+.sw i { width: 18px; height: 18px; border-radius: 50%; }
+
+/* скриншоты */
+.gallery { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.gallery img { border-radius: 16px; border: 1px solid var(--line); cursor: zoom-in; transition: transform .2s; }
+.gallery img:hover { transform: scale(1.015); }
+.lb { position: fixed; inset: 0; background: #000d; display: none; place-items: center; z-index: 50; padding: 20px; cursor: zoom-out; }
+.lb.on { display: grid; }
+.lb img { max-height: 92vh; border-radius: 14px; }
+
+/* скачать */
+.download { text-align: center; background: linear-gradient(180deg, #ffffff07, transparent); border: 1px solid var(--line); border-radius: 28px; padding: 60px 24px; position: relative; overflow: hidden; }
+.download::before { content: ''; position: absolute; inset: -40% 20% auto; height: 300px; background: radial-gradient(closest-side, #dc51ff44, transparent); }
+.download > * { position: relative; }
+.dl-meta { color: var(--muted); margin-top: 16px; font-size: 14px; }
+.req { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-top: 22px; }
+
+/* FAQ */
+details { border: 1px solid var(--line); border-radius: 14px; padding: 16px 20px; margin-bottom: 10px; background: #ffffff05; }
+summary { cursor: pointer; font-weight: 700; font-size: 16.5px; list-style: none; display: flex; justify-content: space-between; gap: 10px; }
+summary::after { content: '+'; color: var(--pink); font-size: 22px; line-height: 1; }
+details[open] summary::after { content: '–'; }
+details p { color: var(--muted); margin: 12px 0 0; }
+
+footer { border-top: 1px solid var(--line); padding: 30px 0 50px; color: var(--muted); font-size: 13.5px; }
+footer .wrap { display: flex; gap: 20px; justify-content: space-between; flex-wrap: wrap; }
+
+.reveal { opacity: 0; transform: translateY(24px); transition: opacity .7s, transform .7s; }
+.reveal.in { opacity: 1; transform: none; }
+
+@media (max-width: 860px) {
+  nav { display: none; }
+  .lang { margin-left: auto; }
+  .split, .gallery { grid-template-columns: 1fr; }
+  .themes { grid-template-columns: 1fr; }
+  .shot-main { transform: none; }
+  section { padding: 64px 0; }
+}
+@media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } .reveal { opacity: 1; transform: none; } }
+</style>
+</head>
+<body>
+<div class="glow"></div>
+
+<header>
+  <div class="wrap">
+    <a class="brand" href="#"><img src="logo.svg" alt="">Axolaunch</a>
+    <nav>
+      <a href="#features" data-i="nav1">Возможности</a>
+      <a href="#doctor" data-i="nav2">Доктор сборки</a>
+      <a href="#themes" data-i="nav3">Темы</a>
+      <a href="#faq">FAQ</a>
+      <a href="https://github.com/keysliong/axolaunch">GitHub</a>
+    </nav>
+    <button class="lang" id="lang">EN</button>
+  </div>
+</header>
+
+<main>
+<div class="wrap hero">
+  <img class="logo" src="logo.svg" alt="Axolaunch">
+  <div class="badge"><b>●</b> <span data-i="badge">Бесплатно и с открытым кодом</span> · <span id="ver">v1.1.9</span></div>
+  <h1><span data-i="h1a">Майнкрафт с модами</span><br><span class="g" data-i="h1b">без головной боли</span></h1>
+  <p class="lead" data-i="lead">Ставь моды и сборки с Modrinth и CurseForge в пару кликов. Если игра вылетит, лаунчер сам найдёт сломанный мод и предложит его починить.</p>
+  <div class="cta">
+    <a class="btn main dl-link" href="https://github.com/keysliong/axolaunch/releases/latest">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m0 0-5-5m5 5 5-5M4 21h16"/></svg>
+      <span data-i="dl">Скачать для Windows</span></a>
+    <a class="btn ghost" href="https://github.com/keysliong/axolaunch">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 .5a11.5 11.5 0 0 0-3.6 22.4c.6.1.8-.3.8-.6v-2c-3.2.7-3.9-1.5-3.9-1.5-.5-1.3-1.3-1.7-1.3-1.7-1-.7.1-.7.1-.7 1.2.1 1.8 1.2 1.8 1.2 1 1.8 2.8 1.3 3.5 1 .1-.8.4-1.3.7-1.6-2.6-.3-5.3-1.3-5.3-5.7 0-1.3.5-2.3 1.2-3.1-.1-.3-.5-1.5.1-3.1 0 0 1-.3 3.2 1.2a11 11 0 0 1 5.8 0c2.2-1.5 3.2-1.2 3.2-1.2.6 1.6.2 2.8.1 3.1.7.8 1.2 1.8 1.2 3.1 0 4.4-2.7 5.4-5.3 5.7.4.4.8 1.1.8 2.2v3.3c0 .3.2.7.8.6A11.5 11.5 0 0 0 12 .5Z"/></svg>
+      <span data-i="src">Исходный код</span></a>
+  </div>
+  <div class="sub-cta"><span data-i="sub">Windows 10/11 · установщик или переносная версия</span> · <a class="dl-portable" href="https://github.com/keysliong/axolaunch/releases/latest" data-i="portable">portable .exe</a></div>
+  <img class="shot-main" src="img/home.png" alt="Axolaunch — главный экран" width="1280" height="800">
+</div>
+
+<section id="features">
+  <div class="wrap">
+    <div class="kicker reveal" data-i="k1">Возможности</div>
+    <h2 class="reveal" data-i="h2a">Всё, что нужно для модов</h2>
+    <p class="sec-lead reveal" data-i="l2a">Без ручного копирования jar-файлов, поиска нужной версии Fabric и угадывания, какой мод всё сломал.</p>
+    <div class="features">
+      <div class="f reveal"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg></div><h3 data-i="f1t">Modrinth и CurseForge</h3><p data-i="f1d">Один каталог на два источника: моды, сборки, ресурспаки, шейдеры и датапаки. Зависимости ставятся сами.</p></div>
+      <div class="f reveal"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 3 7v10l9 5 9-5V7z"/><path d="m3 7 9 5 9-5M12 12v10"/></svg></div><h3 data-i="f2t">Все версии и загрузчики</h3><p data-i="f2d">Vanilla, Fabric, Forge, NeoForge и Quilt. От старых версий до свежих снапшотов, нужная Java скачивается автоматически.</p></div>
+      <div class="f reveal"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a4 4 0 0 0 5 5L22 14l-8 8-2.3-2.3a4 4 0 0 0-5-5L2 10l8-8z"/></svg></div><h3 data-i="f3t">Доктор сборки</h3><p data-i="f3d">Игра вылетела? Лаунчер прочитает лог, найдёт виновный мод и предложит обновить, отключить или доставить недостающий.</p></div>
+      <div class="f reveal"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="13.5" cy="6.5" r="1.5"/><circle cx="17.5" cy="10.5" r="1.5"/><circle cx="8.5" cy="7.5" r="1.5"/><circle cx="6.5" cy="12.5" r="1.5"/><path d="M12 2a10 10 0 0 0 0 20c1.1 0 2-.9 2-2 0-.5-.2-1-.5-1.3-.3-.4-.5-.8-.5-1.3 0-1.1.9-2 2-2h2.4A5.6 5.6 0 0 0 22 9.8C22 5.5 17.5 2 12 2Z"/></svg></div><h3 data-i="f4t">10 тем и свой CSS</h3><p data-i="f4d">Аксолотль, Незер, Энд, Океан, OLED, Ретро-терминал… Иконка лаунчера перекрашивается под каждую тему.</p></div>
+      <div class="f reveal"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg></div><h3 data-i="f5t">Экспорт в .mrpack</h3><p data-i="f5d">Собрал сборку — поделись одним файлом. Друг перетащит его в окно лаунчера и получит то же самое.</p></div>
+      <div class="f reveal"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 3 14h9l-1 8 10-12h-9z"/></svg></div><h3 data-i="f6t">Быстрые загрузки</h3><p data-i="f6d">Десятки потоков, проверка хешей, повторы при обрывах, а любую загрузку можно отменить.</p></div>
+      <div class="f reveal"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20Z"/><path d="M8 14s1.5 2 4 2 4-2 4-2M9 9h.01M15 9h.01"/></svg></div><h3 data-i="f7t">Аксолотль-питомец</h3><p data-i="f7d">Живёт в боковой панели, комментирует происходящее и бывает разных цветов. Синего встретить почти невозможно.</p></div>
+      <div class="f reveal"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m5 8 6 6M4 14l6-6 2-3M2 5h12M7 2h1M22 22l-5-10-5 10M14 18h6"/></svg></div><h3 data-i="f8t">Русский и английский</h3><p data-i="f8d">Полностью переведённый интерфейс, достижения, советы и секретики для любопытных.</p></div>
+    </div>
+  </div>
+</section>
+
+<section id="doctor">
+  <div class="wrap split">
+    <div>
+      <div class="kicker reveal" data-i="k2">Доктор сборки</div>
+      <h2 class="reveal" data-i="h2b">Вылет? Починим за один клик</h2>
+      <p class="sec-lead reveal" data-i="l2b">Axolaunch читает лог и crash-report, сам разбирается в ошибках Fabric, Forge и NeoForge и объясняет человеческим языком, что случилось.</p>
+      <ul class="check reveal">
+        <li data-i="c1"><b>Не хватает мода</b> — найдёт и установит с Modrinth</li>
+        <li data-i="c2"><b>Мод не для этой версии</b> — обновит до подходящей</li>
+        <li data-i="c3"><b>Конфликт или дубль</b> — отключит лишний (можно вернуть)</li>
+        <li data-i="c4"><b>Не та Java или мало памяти</b> — поправит настройки</li>
+      </ul>
+    </div>
+    <div class="doc-card reveal">
+      <h4 data-i="dt">Игра вылетела — нашли причину</h4>
+      <div class="doc-item"><b data-i="d1">Не хватает мода «Fabric API»</b><span data-i="d1s">Он нужен моду «AppleSkin».</span>
+        <div class="pills"><span class="pill on" data-i="p1">Установить «Fabric API»</span><span class="pill" data-i="p0">Ничего не делать</span></div></div>
+      <div class="doc-item"><b data-i="d2">«Sodium» не для этой версии игры</b><span data-i="d2s">Мод рассчитан на 1.20.1, а в сборке 1.21.1.</span>
+        <div class="pills"><span class="pill on" data-i="p2">Обновить до 0.8.13</span><span class="pill" data-i="p3">Отключить мод</span><span class="pill" data-i="p4">Удалить мод</span></div></div>
+      <div class="doc-btn"><span data-i="fix">Починить</span></div>
+    </div>
+  </div>
+</section>
+
+<section id="themes">
+  <div class="wrap">
+    <div class="kicker reveal" data-i="k3">Темы</div>
+    <h2 class="reveal" data-i="h2c">Под любое настроение</h2>
+    <p class="sec-lead reveal" data-i="l2c">Десять тем, свой акцентный цвет, шесть шрифтов, фоновая картинка и поле для собственного CSS.</p>
+    <div class="themes">
+      <figure class="reveal"><img src="img/theme-end.png" alt="" loading="lazy" width="1280" height="800"><figcaption><i style="background:#c58bff"></i><span data-i="t1">Энд</span></figcaption></figure>
+      <figure class="reveal"><img src="img/theme-nether.png" alt="" loading="lazy" width="1280" height="800"><figcaption><i style="background:#ff6a2b"></i><span data-i="t2">Незер</span></figcaption></figure>
+      <figure class="reveal"><img src="img/theme-ocean.png" alt="" loading="lazy" width="1280" height="800"><figcaption><i style="background:#2bd4e0"></i><span data-i="t3">Океан</span></figcaption></figure>
+    </div>
+    <div class="swatches reveal">
+      <span class="sw"><i style="background:#ff7ab8"></i><span data-i="s1">Аксолотль</span></span><span class="sw"><i style="background:#1bd96a"></i>Modrinth</span><span class="sw"><i style="background:#8ab4ff"></i>OLED</span><span class="sw"><i style="background:#d9468f"></i><span data-i="s2">Светлая</span></span><span class="sw"><i style="background:#8fdc5a"></i><span data-i="s3">Лес</span></span><span class="sw"><i style="background:#ffb3d1"></i><span data-i="s4">Вишня</span></span><span class="sw"><i style="background:#33ff33"></i><span data-i="s5">Ретро-терминал</span></span>
+    </div>
+  </div>
+</section>
+
+<section id="shots">
+  <div class="wrap">
+    <div class="kicker reveal" data-i="k4">Скриншоты</div>
+    <h2 class="reveal" data-i="h2d">Посмотри изнутри</h2>
+    <div class="gallery" style="margin-top:30px">
+      <img class="reveal" src="img/catalog.png" alt="" loading="lazy" width="1280" height="800">
+      <img class="reveal" src="img/library.png" alt="" loading="lazy" width="1280" height="800">
+      <img class="reveal" src="img/settings.png" alt="" loading="lazy" width="1280" height="800">
+      <img class="reveal" src="img/home.png" alt="" loading="lazy" width="1280" height="800">
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="download reveal">
+      <img src="logo.svg" alt="" style="width:76px;height:76px;border-radius:22px;margin:0 auto 20px;box-shadow:0 0 40px #dc51ff55">
+      <h2 data-i="h2e">Готов попробовать?</h2>
+      <p class="sec-lead" style="margin:0 auto 28px" data-i="l2e">Установка занимает минуту. Сборки, моды и настройки хранятся у тебя на компьютере.</p>
+      <div class="cta">
+        <a class="btn main dl-link" href="https://github.com/keysliong/axolaunch/releases/latest"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m0 0-5-5m5 5 5-5M4 21h16"/></svg><span data-i="dl2">Скачать установщик</span></a>
+        <a class="btn ghost dl-portable" href="https://github.com/keysliong/axolaunch/releases/latest" data-i="portable2">Переносная версия</a>
+      </div>
+      <div class="dl-meta" id="dl-meta">Windows 10 / 11 · x64</div>
+    </div>
+  </div>
+</section>
+
+<section id="faq" style="padding-top:20px">
+  <div class="wrap" style="max-width:820px">
+    <div class="kicker reveal">FAQ</div>
+    <h2 class="reveal" data-i="h2f">Частые вопросы</h2>
+    <details class="reveal"><summary data-i="q1">Это бесплатно?</summary><p data-i="a1">Да, полностью. Код открыт на GitHub под лицензией MIT, рекламы нет.</p></details>
+    <details class="reveal"><summary data-i="q2">Windows пишет «Система Windows защитила ваш компьютер»</summary><p data-i="a2">Лаунчер пока не подписан платным сертификатом, поэтому SmartScreen его не знает. Нажмите «Подробнее» → «Выполнить в любом случае». Исходный код открыт — можно проверить и собрать самому.</p></details>
+    <details class="reveal"><summary data-i="q3">Нужна ли лицензия Minecraft?</summary><p data-i="a3">Для игры нужен аккаунт Microsoft с купленной Minecraft: Java Edition. Вход происходит через официальное окно Microsoft, пароль лаунчер не видит.</p></details>
+    <details class="reveal"><summary data-i="q4">Зачем CurseForge просит ключ?</summary><p data-i="a4">CurseForge пускает сторонние лаунчеры только с личным API-ключом. Он бесплатный: создайте его на console.curseforge.com и вставьте в лаунчер. Modrinth работает без ключей.</p></details>
+    <details class="reveal"><summary data-i="q5">Можно перенести сборки из другого лаунчера?</summary><p data-i="a5">Да: экспортируйте сборку в .mrpack (Modrinth App, Prism и другие это умеют) и перетащите файл в окно Axolaunch.</p></details>
+    <details class="reveal"><summary data-i="q6">Нашёл баг или есть идея</summary><p data-i="a6">Пишите в Issues на GitHub — с логом или скриншотом починим быстрее.</p></details>
+  </div>
+</section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <div>© 2026 Axolaunch · MIT</div>
+    <div data-i="legal">Не связан с Mojang Studios и Microsoft. Minecraft — товарный знак Mojang Synergies AB.</div>
+    <div><a href="https://github.com/keysliong/axolaunch">GitHub</a> · <a href="https://github.com/keysliong/axolaunch/issues">Issues</a></div>
+  </div>
+</footer>
+
+<div class="lb" id="lb"><img alt=""></div>
+
+<script>
+const EN = {
+  nav1: 'Features', nav2: 'Instance doctor', nav3: 'Themes', badge: 'Free and open source',
+  h1a: 'Modded Minecraft', h1b: 'without the headache',
+  lead: 'Install mods and modpacks from Modrinth and CurseForge in a couple of clicks. If the game crashes, the launcher finds the broken mod and offers to fix it.',
+  dl: 'Download for Windows', src: 'Source code', sub: 'Windows 10/11 · installer or portable', portable: 'portable .exe',
+  k1: 'Features', h2a: 'Everything you need for mods', l2a: 'No copying jar files by hand, hunting for the right Fabric version or guessing which mod broke everything.',
+  f1t: 'Modrinth and CurseForge', f1d: 'One catalog, two sources: mods, modpacks, resource packs, shaders and datapacks. Dependencies install themselves.',
+  f2t: 'Every version and loader', f2d: 'Vanilla, Fabric, Forge, NeoForge and Quilt. From old releases to fresh snapshots; the right Java is downloaded automatically.',
+  f3t: 'Instance doctor', f3d: 'Game crashed? The launcher reads the log, finds the culprit and offers to update, disable or add the missing mod.',
+  f4t: '10 themes and custom CSS', f4d: 'Axolotl, Nether, The End, Ocean, OLED, Retro terminal… The launcher icon recolors itself for every theme.',
+  f5t: '.mrpack export', f5d: 'Built a modpack? Share it as one file. Your friend drops it into the launcher and gets the exact same setup.',
+  f6t: 'Fast downloads', f6d: 'Dozens of threads, hash checks, retries on broken connections — and any download can be cancelled.',
+  f7t: 'Axolotl pet', f7d: 'Lives in the sidebar, comments on what is happening and comes in different colors. The blue one is almost impossible to meet.',
+  f8t: 'Russian and English', f8d: 'Fully translated interface, achievements, tips and secrets for the curious.',
+  k2: 'Instance doctor', h2b: 'Crashed? Fixed in one click', l2b: 'Axolaunch reads the log and crash report, understands Fabric, Forge and NeoForge errors and explains what happened in plain words.',
+  c1: '<b>Missing mod</b> — finds and installs it from Modrinth', c2: '<b>Wrong game version</b> — updates it to a matching one', c3: '<b>Conflict or duplicate</b> — disables the extra one (reversible)', c4: '<b>Wrong Java or low memory</b> — fixes the settings',
+  dt: 'The game crashed — found the cause', d1: 'Missing mod “Fabric API”', d1s: 'It is required by “AppleSkin”.', p1: 'Install “Fabric API”', p0: 'Do nothing',
+  d2: '“Sodium” is not for this game version', d2s: 'The mod targets 1.20.1, but this instance is 1.21.1.', p2: 'Update to 0.8.13', p3: 'Disable mod', p4: 'Remove mod', fix: 'Fix',
+  k3: 'Themes', h2c: 'For every mood', l2c: 'Ten themes, a custom accent color, six fonts, a background image and a box for your own CSS.',
+  t1: 'The End', t2: 'Nether', t3: 'Ocean', s1: 'Axolotl', s2: 'Light', s3: 'Forest', s4: 'Cherry', s5: 'Retro terminal',
+  k4: 'Screenshots', h2d: 'Take a look inside', h2e: 'Ready to try?', l2e: 'Installation takes a minute. Your instances, mods and settings stay on your computer.',
+  dl2: 'Download installer', portable2: 'Portable version', h2f: 'FAQ',
+  q1: 'Is it free?', a1: 'Yes, completely. The code is open on GitHub under the MIT license, no ads.',
+  q2: 'Windows says “Windows protected your PC”', a2: 'The launcher is not signed with a paid certificate yet, so SmartScreen does not know it. Click “More info” → “Run anyway”. The source is open — you can check and build it yourself.',
+  q3: 'Do I need to own Minecraft?', a3: 'You need a Microsoft account that owns Minecraft: Java Edition. Sign-in happens in the official Microsoft window; the launcher never sees your password.',
+  q4: 'Why does CurseForge ask for a key?', a4: 'CurseForge only lets third-party launchers in with a personal API key. It is free: create one at console.curseforge.com and paste it into the launcher. Modrinth works without keys.',
+  q5: 'Can I move instances from another launcher?', a5: 'Yes: export the instance to .mrpack (Modrinth App, Prism and others can) and drop the file into Axolaunch.',
+  q6: 'Found a bug or have an idea', a6: 'Open an issue on GitHub — a log or screenshot helps fix it faster.',
+  legal: 'Not affiliated with Mojang Studios or Microsoft. Minecraft is a trademark of Mojang Synergies AB.',
+}
+const RU = {}
+document.querySelectorAll('[data-i]').forEach(e => RU[e.dataset.i] = e.innerHTML)
+let lang = (navigator.language || '').startsWith('ru') ? 'ru' : 'en'
+try { lang = localStorage.getItem('axo-lang') || lang } catch {}
+function setLang(l) {
+  lang = l
+  const d = l === 'en' ? EN : RU
+  document.querySelectorAll('[data-i]').forEach(e => { if (d[e.dataset.i]) e.innerHTML = d[e.dataset.i] })
+  document.documentElement.lang = l
+  document.getElementById('lang').textContent = l === 'en' ? 'RU' : 'EN'
+  try { localStorage.setItem('axo-lang', l) } catch {}
+}
+document.getElementById('lang').onclick = () => setLang(lang === 'en' ? 'ru' : 'en')
+if (lang === 'en') setLang('en')
+
+// прямые ссылки на файлы последнего релиза
+fetch('https://api.github.com/repos/keysliong/axolaunch/releases/latest').then(r => r.ok ? r.json() : null).then(rel => {
+  if (!rel) return
+  const setup = rel.assets.find(a => /setup.*\.exe$/i.test(a.name))
+  const portable = rel.assets.find(a => /\.exe$/i.test(a.name) && !/setup/i.test(a.name))
+  if (setup) document.querySelectorAll('.dl-link').forEach(a => a.href = setup.browser_download_url)
+  if (portable) document.querySelectorAll('.dl-portable').forEach(a => a.href = portable.browser_download_url)
+  document.getElementById('ver').textContent = rel.tag_name
+  if (setup) document.getElementById('dl-meta').textContent = `${rel.tag_name} · ${Math.round(setup.size / 1048576)} MB · Windows 10 / 11 · x64`
+}).catch(() => {})
+
+// появление при прокрутке
+const io = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target) } }), { threshold: .12 })
+document.querySelectorAll('.reveal').forEach(e => io.observe(e))
+
+// просмотр скриншотов
+const lb = document.getElementById('lb')
+document.querySelectorAll('.gallery img, .themes img').forEach(img => img.onclick = () => { lb.querySelector('img').src = img.src; lb.classList.add('on') })
+lb.onclick = () => lb.classList.remove('on')
+</script>
+</body>
+</html>

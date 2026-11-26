@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+<defs>
+  <linearGradient id="neon" x1="0" y1="1" x2="1" y2="0"><stop stop-color="#ff5dbd"/><stop offset=".48" stop-color="#dc51ff"/><stop offset="1" stop-color="#8d6bff"/></linearGradient>
+  <linearGradient id="edge" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#ff70ce"/><stop offset="1" stop-color="#9a72ff"/></linearGradient>
+  <radialGradient id="aura"><stop stop-color="#8224a4" stop-opacity=".32"/><stop offset="1" stop-color="#05050a" stop-opacity="0"/></radialGradient>
+  <filter id="glow" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="16" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+  <filter id="soft" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="4"/></filter>
+  <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#100d18"/><stop offset=".48" stop-color="#08080e"/><stop offset="1" stop-color="#130a18"/></linearGradient>
+</defs>
+<rect width="1024" height="1024" fill="url(#bg)"/><ellipse cx="512" cy="510" rx="450" ry="390" fill="url(#aura)"/>
+<!-- restrained angular corner inlays -->
+<g fill="none" stroke="url(#edge)" opacity=".58">
+ <path d="M-30 220h206q44 0 67-37L354 -25" stroke-width="2"/><path d="M-25 258h191q61 0 91-49l116-189" stroke-width="1" opacity=".38"/>
+ <path d="M1054 804H848q-44 0-67 37L670 1050" stroke-width="2"/><path d="M1049 766H858q-61 0-91 49L651 1004" stroke-width="1" opacity=".38"/>
+</g>
+<!-- halo -->
+<path d="M330 724 501 303q7-17 25-17t25 17l169 421q8 21-14 21h-77q-14 0-20-15l-83-218-83 218q-6 15-20 15h-79q-22 0-14-21Z" fill="none" stroke="url(#neon)" stroke-width="30" stroke-linejoin="round" opacity=".27" filter="url(#soft)"/>
+<!-- sculpted A monogram with interwoven ornamental strokes -->
+<g fill="none" stroke="url(#neon)" stroke-linecap="round" stroke-linejoin="round" filter="url(#glow)">
+ <path d="M319 714 493 302q10-24 34-24t34 24l174 412" stroke-width="48"/>
+ <path d="M399 566h252" stroke-width="39"/>
+ <path d="M372 713q36-73 87-112 29-22 68-22t68 22q51 39 87 112" stroke-width="13" opacity=".94"/>
+ <path d="M450 445q28-57 77-57t77 57" stroke-width="13" opacity=".94"/>
+ <path d="M482 713q30-42 45-79 15 37 45 79" stroke-width="12" opacity=".9"/>
+</g>
+<!-- fine ornamental curls and diamond tips -->
+<g fill="none" stroke="url(#edge)" stroke-width="5" stroke-linecap="round" opacity=".96">
+ <path d="M346 650q-30-28-54-8 15 30 47 20m339-12q30-28 54-8-15 30-47 20"/>
+ <path d="M456 386q-26-29-49-9 11 27 40 23m163-14q26-29 49-9-11 27-40 23"/>
+ <path d="M494 641q-34-10-43 16 28 16 51-5m44-11q34-10 43 16-28 16-51-5"/>
+</g>
+<g fill="#ffd0f2"><path d="m288 656 8 8-8 8-8-8zM736 656l8 8-8 8-8-8zM410 371l7 7-7 7-7-7zM614 371l7 7-7 7-7-7z"/></g>
+<!-- tiny glints -->
+<g fill="#fff0fb" opacity=".9"><circle cx="512" cy="238" r="3"/><circle cx="261" cy="512" r="2"/><circle cx="763" cy="512" r="2"/><circle cx="512" cy="786" r="3"/></g>
+</svg>
