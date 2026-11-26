@@ -29,9 +29,13 @@ function readJarMeta(file) {
   const key = `${st.size}:${st.mtimeMs}`
   const hit = metaCache.get(file)
   if (hit && hit.key === key) return hit
-  const out = { key, ids: [], name: '', version: '' }
+  const out = { key, ids: [], name: '', version: '', pkgs: new Set() }
   try {
     const zip = new AdmZip(file)
+    for (const e of zip.getEntries()) {
+      const n = e.entryName
+      if (n.endsWith('.class') && !n.startsWith('META-INF/')) out.pkgs.add(n.slice(0, n.lastIndexOf('/') + 1))
+    }
     const txt = n => { const e = zip.getEntry(n); return e ? e.getData().toString('utf8') : null }
     const fab = txt('fabric.mod.json')
     if (fab) {
@@ -61,11 +65,47 @@ async function modIndex(instId) {
   const byId = new Map()
   const mods = list.filter(m => !m.isDir && /\.jar(\.disabled)?$/i.test(m.file)).map(m => {
     const meta = readJarMeta(path.join(dir, m.file))
-    const mod = { ...m, ids: meta.ids, modName: m.title || meta.name || m.name, modVersion: meta.version || m.versionNumber || '' }
+    const mod = { ...m, ids: meta.ids, pkgs: meta.pkgs, modName: m.title || meta.name || m.name, modVersion: meta.version || m.versionNumber || '' }
     if (m.enabled) for (const id of meta.ids) if (!byId.has(id)) byId.set(id, mod)
     return mod
   })
   return { mods, byId }
+}
+// какому моду принадлежит класс (по пакету внутри jar)
+function ownerOfClass(idx, cls) {
+  if (!cls) return null
+  const parts = cls.replace(/\$.*$/, '').split('.').slice(0, -1)
+  const pkg = parts.join('/') + '/'
+  const direct = idx.mods.find(m => m.enabled && m.pkgs?.has(pkg))
+  if (direct) return direct
+  // мод внутри другого jar (jar-in-jar) — пробуем по сегментам пакета: ru.kelcuprum.kelui → kelui
+  for (const seg of parts.slice(1).reverse()) { const m = idx.byId.get(seg.toLowerCase()); if (m && !SYSTEM.has(seg)) return m }
+  return null
+}
+
+// ---------- стек вызовов: кто на самом деле упал ----------
+const ENGINE = /^(net\.minecraft\.|com\.mojang\.|net\.fabricmc\.|org\.quiltmc\.loader|java\.|javax\.|jdk\.|sun\.|org\.spongepowered\.|com\.llamalad7\.|cpw\.|net\.neoforged\.(fml|neoforgespi|bus)|net\.minecraftforge\.(fml|eventbus|forgespi)|org\.lwjgl\.|io\.netty\.|com\.google\.|org\.apache\.|it\.unimi\.|org\.slf4j\.|kotlin\.|kotlinx\.)/
+function analyzeStack(text) {
+  // первый блок «исключение + строки at …»
+  const m = /^(?:Caused by: )?((?:[\w$]+\.)+[\w$]*(?:Exception|Error|Throwable))(?::[ \t]*([^\n]*))?\r?\n((?:[ \t]+at [^\n]+\n?)+)/m.exec(text)
+  if (!m) return null
+  const [, exc, msg = '', body] = m
+  const frames = [...body.matchAll(/at (?:[\w.\-]+\/\/)?((?:[\w$]+\.)+?)([\w$<>]+)\(/g)].map(f => ({ cls: f[1].slice(0, -1), method: f[2] }))
+  let cls = null, mixinMod = null
+  for (const fr of frames) {
+    if (!ENGINE.test(fr.cls)) { cls = fr.cls; break }
+    // метод, вшитый миксином: handler$abc123$modid$name
+    const mx = /^(?:handler|redirect|modify\w*|wrapOperation|wrapMethod|localvar|inject)\$\w+?\$([a-z][\w-]*)\$/.exec(fr.method)
+    if (mx && !mixinMod && mx[1] !== 'mixinextras' && !/^fabric(-|$)/.test(mx[1])) mixinMod = mx[1]
+  }
+  // NoSuchMethodError и т. п.: чей класс оказался «не той версии»
+  let missingCls = null
+  if (/NoSuchMethodError|NoSuchFieldError|NoClassDefFoundError|ClassNotFoundException|IncompatibleClassChangeError|AbstractMethodError/.test(exc)) {
+    const c = /((?:[a-z][\w$]*\.){2,}[A-Z][\w$]*)/.exec(msg.replace(/\//g, '.'))
+    missingCls = c ? c[1] : null
+  }
+  if (!cls && !mixinMod) return null
+  return { exc: exc.split('.').pop(), cls, mixinMod, missingCls }
 }
 
 // ---------- сбор текста ----------
@@ -137,7 +177,12 @@ function analyzeText(text, idx, inst) {
   const sus = /Suspected Mods?(?:\(s\))?:\s*\n((?:[ \t]+[^\n]+\n?)+)/.exec(text)
   if (sus) for (const m of sus[1].matchAll(/\(([\w.-]+)\)/g)) if (isMod(m[1].toLowerCase())) add({ kind: 'crash', target: m[1].toLowerCase() })
   for (const m of text.matchAll(/Mixin apply for mod ([\w.-]+) failed/g)) add({ kind: 'crash', target: m[1].toLowerCase() })
-  for (const m of text.matchAll(/\.mixins?\.json:[\w.$]+ from mod ([\w.-]+)/g)) if (isMod(m[1].toLowerCase())) add({ kind: 'crash', target: m[1].toLowerCase() })
+  // строки WARN/INFO вида «@Mixin target … was not found … from mod X» безобидны — учитываем только ошибки
+  for (const line of text.split(/\r?\n/)) {
+    if (/\/(WARN|INFO|DEBUG)\]|was not found|Skipping/.test(line)) continue
+    const m = /\.mixins?\.json:[\w.$]+ from mod ([\w.-]+)/.exec(line)
+    if (m && isMod(m[1].toLowerCase())) add({ kind: 'crash', target: m[1].toLowerCase() })
+  }
 
   // Java
   const cv = /UnsupportedClassVersionError[^\n]*class file version (\d+)/.exec(text)
@@ -168,12 +213,26 @@ async function diagnose(instId, { logs, since } = {}) {
   if (!text.trim()) return { problems: [], crashFile }
   const idx = await modIndex(instId)
   const raw = analyzeText(text, idx, inst)
+  // стек из crash-report (если он есть) точнее всех остальных признаков
+  let st = null
+  try { st = analyzeStack(crashFile ? fs.readFileSync(crashFile, 'utf8') : text) } catch {}
+  const culprit = st && (ownerOfClass(idx, st.cls) || (st.mixinMod && idx.byId.get(st.mixinMod.toLowerCase())))
+  if (culprit && !raw.some(p => ['missing', 'wrongGame', 'loader', 'java'].includes(p.kind))) {
+    const other = ownerOfClass(idx, st.missingCls)
+    // «упоминания в отчёте» — лишь догадки, когда виновник уже ясен
+    for (let i = raw.length - 1; i >= 0; i--) if (['crash', 'crashFile'].includes(raw[i].kind)) raw.splice(i, 1)
+    raw.unshift({ kind: 'stack', mod: culprit, other: other && other !== culprit ? other : null, exc: st.exc })
+  } else if (st?.cls && !raw.some(p => !['crash', 'crashFile'].includes(p.kind))) {
+    // виновный код известен, но такого мода в сборке нет (уже удалён) — не сваливаем вину на случайный мод
+    for (let i = raw.length - 1; i >= 0; i--) if (raw[i].guess) raw.splice(i, 1)
+    if (!raw.length) raw.push({ kind: 'gone', pkg: st.cls.split('.').slice(0, -1).join('.'), exc: st.exc })
+  }
 
   let updates = {}
-  const needUpdates = raw.some(p => ['outdated', 'wrongGame', 'crash', 'crashFile', 'conflict'].includes(p.kind))
+  const needUpdates = raw.some(p => ['stack', 'outdated', 'wrongGame', 'crash', 'crashFile', 'conflict'].includes(p.kind))
   if (needUpdates) { try { updates = await modrinth.checkUpdates(instId) } catch (e) { console.warn('doctor updates', e.message) } }
 
-  const modOf = p => p.kind === 'crashFile'
+  const modOf = p => p.kind === 'stack' ? p.mod : p.kind === 'crashFile'
     ? idx.mods.find(m => m.enabled && (m.name === p.target || m.file === p.target))
     : idx.byId.get(p.target)
   const out = []
@@ -220,6 +279,10 @@ async function diagnose(instId, { logs, since } = {}) {
         fixes: next > cur ? [{ id: 'memory', label: tr('Выделить {n} ГБ', { n: (next / 1024).toFixed(1).replace(/\.0$/, '') }), max: next }] : [] })
       continue
     }
+    if (p.kind === 'gone') {
+      out.push({ kind: 'gone', severity: 'warn', title: tr('Ошибка в коде «{pkg}»', { pkg: p.pkg }), detail: tr('Игра упала с ошибкой {exc} в моде, которого сейчас нет в сборке. Если вы его уже удалили или отключили — просто запустите игру снова.', { exc: p.exc }), fixes: [] })
+      continue
+    }
     if (p.kind === 'driver') {
       out.push({ kind: 'driver', severity: 'warn', title: tr('Проблема с видеодрайвером'), detail: tr('Игра не смогла создать окно OpenGL. Обновите драйвер видеокарты с сайта NVIDIA, AMD или Intel.'), fixes: [] })
       continue
@@ -238,6 +301,19 @@ async function diagnose(instId, { logs, since } = {}) {
     const mod = modOf(p)
     if (!mod || seenMods.has(mod.file)) continue
     seenMods.add(mod.file)
+    if (p.kind === 'stack') {
+      const fixes = modFixes(mod)
+      const upOther = p.other && updates[p.other.rel]
+      if (upOther) fixes.splice(fixes[0].id === 'update' ? 1 : 0, 0, { id: 'update', label: tr('Обновить «{name}» до {v}', { name: p.other.modName, v: upOther.versionNumber }), rel: p.other.rel, update: upOther })
+      out.push({
+        kind: 'stack', severity: 'error', title: tr('Игра упала из-за «{name}»', { name: mod.modName }),
+        detail: p.other
+          ? tr('«{name}» не совместим с установленной версией «{other}»: обращается к тому, чего в ней нет ({exc}). Обновите один из модов или отключите «{name}».', { name: mod.modName, other: p.other.modName, exc: p.exc })
+          : tr('Ошибка {exc} произошла в коде этого мода.', { exc: p.exc }),
+        mod: modInfo(mod), fixes,
+      })
+      continue
+    }
     const by = p.by && idx.byId.get(p.by)
     const T = {
       outdated: [tr('«{name}» — неподходящая версия', { name: mod.modName }), by ? tr('Мод «{by}» требует другую версию этого мода.', { by: by.modName }) : tr('Другим модам нужна другая версия этого мода.')],
@@ -289,4 +365,4 @@ async function applyFixes(instId, fixes, ui) {
   return done
 }
 
-module.exports = { diagnose, applyFixes, analyzeText, readJarMeta }
+module.exports = { diagnose, applyFixes, analyzeText, analyzeStack, ownerOfClass, readJarMeta }

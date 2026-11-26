@@ -98,6 +98,11 @@ const EN = {
   "В папке mods несколько копий одного мода.": "The mods folder has several copies of the same mod.",
   "Игра упала из-за «{name}»": "The game crashed because of “{name}”",
   "Этот мод указан в отчёте о вылете.": "This mod is named in the crash report.",
+  "Обновить «{name}» до {v}": "Update “{name}” to {v}",
+  "«{name}» не совместим с установленной версией «{other}»: обращается к тому, чего в ней нет ({exc}). Обновите один из модов или отключите «{name}».": "“{name}” is not compatible with the installed version of “{other}”: it calls something that version doesn't have ({exc}). Update one of them or disable “{name}”.",
+  "Ошибка {exc} произошла в коде этого мода.": "The {exc} happened in this mod's code.",
+  "Ошибка в коде «{pkg}»": "Error in “{pkg}”",
+  "Игра упала с ошибкой {exc} в моде, которого сейчас нет в сборке. Если вы его уже удалили или отключили — просто запустите игру снова.": "The game crashed with {exc} in a mod that is no longer in the instance. If you already removed or disabled it, just launch the game again.",
   "Этот мод чаще других встречается в ошибке — скорее всего, дело в нём.": "This mod appears in the error more than others — it is most likely the cause.",
 }
 
